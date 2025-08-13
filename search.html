@@ -1,0 +1,709 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="search-container">
+    <h1 class="search-title">Destination Dilemma</h1>
+    <div class="subtitle">Your journey begins with a battle against autocorrect</div>
+    
+    <div class="travel-map">
+        <div class="route">
+            <div class="station origin">
+                <div class="station-name">Delhi</div>
+                <div class="station-icon">🚉</div>
+            </div>
+            
+            <div class="journey-line">
+                <div class="train" id="train">🚂</div>
+            </div>
+            
+            <div class="station destination">
+                <div class="station-name" id="destination-name">Mumbai</div>
+                <div class="station-icon">🚉</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="autocorrect-journey">
+        <h2>Autocorrect Adventure</h2>
+        <div class="autocorrect-steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">You wanted: <strong>Delhi → Mumbai</strong></div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">We thought: <strong>{{ autocorrect_target }}</strong></div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content" id="final-destination">Corrected to: <strong>Mumbai</strong></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="funny-stations">
+        <h2>Choose a Hilarious Alternative</h2>
+        <p>Our system thinks you might enjoy one of these destinations instead:</p>
+        
+        <div class="station-options">
+            <div class="station-card" data-destination="Lulla Nagar, Maharashtra">
+                <div class="station-emoji">🏘️</div>
+                <h3>Lulla Nagar</h3>
+                <p>Where sleep is the primary export</p>
+                <button class="select-btn">Select This Misadventure</button>
+            </div>
+            
+            <div class="station-card" data-destination="Bhosari, Pune">
+                <div class="station-emoji">🏭</div>
+                <h3>Bhosari Industrial Zone</h3>
+                <p>Smell the opportunity (literally)</p>
+                <button class="select-btn">Select This Misadventure</button>
+            </div>
+            
+            <div class="station-card" data-destination="Dharavi Slum Tour">
+                <div class="station-emoji">🏙️</div>
+                <h3>Dharavi Experience</h3>
+                <p>Poverty tourism at its "finest"</p>
+                <button class="select-btn">Select This Misadventure</button>
+            </div>
+            
+            <div class="station-card" data-destination="Bandra Underwater">
+                <div class="station-emoji">🌊</div>
+                <h3>Bandra Atlantis</h3>
+                <p>Bring your snorkel during monsoon</p>
+                <button class="select-btn">Select This Misadventure</button>
+            </div>
+        </div>
+        
+        <div class="station-preview">
+            <div class="preview-header">
+                <h3>Your Selected Destination:</h3>
+                <div class="preview-name" id="selected-destination">Mumbai</div>
+            </div>
+            <div class="preview-image" id="destination-image">
+                <img src="https://fakeimg.pl/400x200/?text=Mumbai" alt="Destination preview">
+            </div>
+            <button class="confirm-btn" id="confirm-btn">Confirm This Absurdity</button>
+        </div>
+    </div>
+    
+    <div class="loading-section" id="loading-section">
+        <h2>System Processing Your Request</h2>
+        <div class="loading-bar-container">
+            <div class="loading-bar" id="progress">
+                <div class="loading-progress"></div>
+            </div>
+            <div class="loading-percentage" id="percentage">0%</div>
+        </div>
+        
+        <div class="loading-message" id="loading-message">Starting your journey...</div>
+        
+        <div class="loading-animation">
+            <div class="loader-icon">⌛</div>
+            <div class="loader-icons">
+                <span>📝</span>
+                <span>📋</span>
+                <span>📊</span>
+                <span>📑</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Define funny stations with descriptions and images
+    const funnyStations = {
+        "Mumbai": {
+            image: "https://fakeimg.pl/400x200/?text=Mumbai",
+            description: "The city that never sleeps (because of traffic)"
+        },
+        "Lulla Nagar, Maharashtra": {
+            image: "https://fakeimg.pl/400x200/?text=Lulla+Nagar&font=bebas",
+            description: "Home of the world's longest napping competition"
+        },
+        "Bhosari, Pune": {
+            image: "https://fakeimg.pl/400x200/?text=Bhosari+Industrial&font=bebas",
+            description: "Where the air is 10% oxygen, 90% ambition"
+        },
+        "Dharavi Slum Tour": {
+            image: "https://fakeimg.pl/400x200/?text=Dharavi+Experience&font=bebas",
+            description: "Poverty tourism with 'authentic' smells included"
+        },
+        "Bandra Underwater": {
+            image: "https://fakeimg.pl/400x200/?text=Bandra+Atlantis&font=bebas",
+            description: "Underwater kingdom (during monsoon only)"
+        }
+    };
+
+    // Set up station selection
+    const stationCards = document.querySelectorAll('.station-card');
+    const selectedDestinationEl = document.getElementById('selected-destination');
+    const destinationImageEl = document.getElementById('destination-image');
+    const destinationNameEl = document.getElementById('destination-name');
+    const finalDestinationEl = document.getElementById('final-destination');
+    const confirmBtn = document.getElementById('confirm-btn');
+    const loadingSection = document.getElementById('loading-section');
+    
+    // Hide loading section initially
+    loadingSection.style.display = 'none';
+    
+    // Add event listeners to station cards
+    stationCards.forEach(card => {
+        const selectBtn = card.querySelector('.select-btn');
+        const destination = card.dataset.destination;
+        
+        selectBtn.addEventListener('click', () => {
+            // Update selected destination
+            selectedDestinationEl.textContent = destination;
+            destinationNameEl.textContent = destination;
+            
+            // Update preview image
+            destinationImageEl.innerHTML = `<img src="${funnyStations[destination].image}" alt="${destination}">`;
+            
+            // Update final destination text
+            finalDestinationEl.innerHTML = `Corrected to: <strong>${destination}</strong>`;
+            
+            // Highlight selected card
+            stationCards.forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            
+            // Enable confirm button
+            confirmBtn.disabled = false;
+            confirmBtn.classList.add('active');
+        });
+    });
+    
+    // Confirm button handler
+    confirmBtn.addEventListener('click', () => {
+        // Hide station selection and show loading
+        document.querySelector('.funny-stations').style.display = 'none';
+        loadingSection.style.display = 'block';
+        
+        // Start the loading animation
+        startLoading();
+    });
+    
+    // Loading animation function
+    function startLoading() {
+        const messages = [
+            {percent: 5, message: "Asking train conductor if his mood is okay..."},
+            {percent: 27, message: "Sending request form to the concerned department"},
+            {percent: 47, message: "File is under consideration. Please check back next fiscal year"},
+            {percent: 78, message: "Waking up the server with a bucket of water 💧"},
+            {percent: 99, message: "Finding a good muhurat (auspicious time) to dispatch tickets"},
+            {percent: 45, message: "Error: Tea break in progress ☕"}
+        ];
+        
+        let progress = 0;
+        const progressBar = document.querySelector('.loading-progress');
+        const percentageEl = document.getElementById('percentage');
+        const messageEl = document.getElementById('loading-message');
+        const train = document.getElementById('train');
+        
+        // Set initial train position
+        train.style.left = '0%';
+        
+        // Function to update a random message
+        function getRandomMessage() {
+            const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+            return randomMsg;
+        }
+        
+        // Set interval for loading animation
+        const interval = setInterval(() => {
+            // Increment progress randomly
+            progress += Math.floor(Math.random() * 20);
+            if (progress > 100) progress = 100;
+            
+            // Update progress bar
+            progressBar.style.width = `${progress}%`;
+            percentageEl.textContent = `${progress}%`;
+            
+            // Update train position
+            train.style.left = `${progress}%`;
+            
+            // Change message at certain intervals
+            if ([5, 27, 47, 78, 99, 45].includes(progress)) {
+                const randomMsg = getRandomMessage();
+                messageEl.textContent = `${randomMsg.percent}% → ${randomMsg.message}`;
+                
+                // Add visual effect
+                messageEl.style.animation = 'none';
+                setTimeout(() => {
+                    messageEl.style.animation = 'textPop 0.5s';
+                }, 10);
+            }
+            
+            // When progress completes
+            if (progress >= 100) {
+                clearInterval(interval);
+                messageEl.textContent = "100% → Success! Preparing your seat selection battle...";
+                
+                // Add celebration effect
+                progressBar.style.background = 'linear-gradient(90deg, #1a936f, #4ecdc4, #9b5de5)';
+                document.querySelector('.loading-bar-container').classList.add('celebrate');
+                
+                // Redirect after delay
+                setTimeout(() => {
+                    window.location.href = "{{ url_for('seat_selection') }}";
+                }, 3000);
+            }
+        }, 500);
+        
+        // Additional animation for the loader icons
+        const loaderIcons = document.querySelectorAll('.loader-icons span');
+        loaderIcons.forEach((icon, index) => {
+            icon.style.animationDelay = `${index * 0.5}s`;
+        });
+    }
+</script>
+
+<style>
+    .search-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 30px;
+        background: linear-gradient(135deg, #f5f7fa, #e4edf9);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .search-container::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 10px;
+        background: linear-gradient(90deg, #4ecdc4, #1a936f, #9b5de5);
+    }
+    
+    .search-title {
+        text-align: center;
+        color: #2b2d42;
+        font-size: 2.8rem;
+        margin-bottom: 10px;
+        background: linear-gradient(45deg, #1a2a6c, #b21f1f);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .subtitle {
+        text-align: center;
+        color: #4a5568;
+        font-size: 1.4rem;
+        margin-bottom: 40px;
+        font-style: italic;
+    }
+    
+    .travel-map {
+        background: url('https://www.transparenttextures.com/patterns/old-map.png');
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 40px;
+        border: 3px solid #c9b18a;
+        box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+        position: relative;
+    }
+    
+    .route {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        height: 150px;
+    }
+    
+    .station {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        width: 180px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        z-index: 2;
+        border: 2px solid #4ecdc4;
+    }
+    
+    .station-name {
+        font-size: 1.6rem;
+        font-weight: bold;
+        color: #2b2d42;
+        margin-bottom: 10px;
+    }
+    
+    .station-icon {
+        font-size: 3rem;
+    }
+    
+    .journey-line {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 8px;
+        background: repeating-linear-gradient(
+            90deg,
+            #e2e8f0,
+            #e2e8f0 20px,
+            #cbd5e0 20px,
+            #cbd5e0 40px
+        );
+        z-index: 1;
+    }
+    
+    .train {
+        position: absolute;
+        font-size: 3rem;
+        top: -30px;
+        left: 0;
+        transition: left 0.5s ease;
+        z-index: 3;
+        animation: trainBounce 0.8s infinite alternate;
+    }
+    
+    @keyframes trainBounce {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(-10px); }
+    }
+    
+    .autocorrect-journey {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 40px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        border-left: 5px solid #9b5de5;
+    }
+    
+    .autocorrect-journey h2 {
+        color: #2b2d42;
+        margin-bottom: 20px;
+        text-align: center;
+        font-size: 1.8rem;
+    }
+    
+    .autocorrect-steps {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+    }
+    
+    .autocorrect-steps::before {
+        content: "";
+        position: absolute;
+        top: 40px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #4ecdc4, #9b5de5);
+        z-index: 1;
+    }
+    
+    .step {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        width: 30%;
+        position: relative;
+        z-index: 2;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s;
+        border: 2px solid #e2e8f0;
+    }
+    
+    .step:hover {
+        transform: translateY(-10px);
+        border-color: #9b5de5;
+    }
+    
+    .step-number {
+        width: 40px;
+        height: 40px;
+        background: #4ecdc4;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin: 0 auto 15px;
+        font-size: 1.2rem;
+    }
+    
+    .step-content {
+        font-size: 1.1rem;
+        color: #4a5568;
+    }
+    
+    .step-content strong {
+        color: #2b2d42;
+        font-weight: bold;
+    }
+    
+    .funny-stations {
+        background: #fffaf0;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        border: 3px dashed #ff6b6b;
+    }
+    
+    .funny-stations h2 {
+        text-align: center;
+        color: #e63946;
+        margin-bottom: 15px;
+        font-size: 2rem;
+    }
+    
+    .funny-stations p {
+        text-align: center;
+        color: #5d4037;
+        margin-bottom: 30px;
+        font-size: 1.2rem;
+    }
+    
+    .station-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .station-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s;
+        border: 2px solid #e2e8f0;
+        cursor: pointer;
+    }
+    
+    .station-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        border-color: #9b5de5;
+    }
+    
+    .station-card.selected {
+        border: 3px solid #4ecdc4;
+        background: #f0f8ff;
+        transform: scale(1.05);
+    }
+    
+    .station-emoji {
+        font-size: 3rem;
+        margin-bottom: 15px;
+    }
+    
+    .station-card h3 {
+        color: #2b2d42;
+        margin-bottom: 10px;
+        font-size: 1.4rem;
+    }
+    
+    .station-card p {
+        color: #4a5568;
+        font-size: 1rem;
+        margin-bottom: 20px;
+        min-height: 50px;
+    }
+    
+    .select-btn {
+        background: #ffd166;
+        color: #2b2d42;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 50px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .select-btn:hover {
+        background: #ffb347;
+        transform: scale(1.05);
+    }
+    
+    .station-preview {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        border: 3px solid #4ecdc4;
+    }
+    
+    .preview-header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .preview-header h3 {
+        color: #2b2d42;
+        font-size: 1.4rem;
+    }
+    
+    .preview-name {
+        background: #4ecdc4;
+        color: white;
+        padding: 8px 20px;
+        border-radius: 50px;
+        font-weight: bold;
+        font-size: 1.3rem;
+    }
+    
+    .preview-image {
+        margin-bottom: 25px;
+    }
+    
+    .preview-image img {
+        width: 100%;
+        max-width: 400px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .confirm-btn {
+        background: #e63946;
+        color: white;
+        border: none;
+        padding: 15px 40px;
+        border-radius: 50px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+        opacity: 0.5;
+    }
+    
+    .confirm-btn.active {
+        opacity: 1;
+        background: linear-gradient(135deg, #e63946, #ff6b6b);
+        box-shadow: 0 5px 15px rgba(230, 57, 70, 0.3);
+    }
+    
+    .confirm-btn.active:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px rgba(230, 57, 70, 0.4);
+    }
+    
+    .loading-section {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        display: none;
+    }
+    
+    .loading-section h2 {
+        text-align: center;
+        color: #2b2d42;
+        margin-bottom: 30px;
+        font-size: 1.8rem;
+    }
+    
+    .loading-bar-container {
+        background: #e2e8f0;
+        border-radius: 50px;
+        height: 30px;
+        margin-bottom: 20px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+        transition: all 0.5s;
+    }
+    
+    .loading-bar-container.celebrate {
+        box-shadow: 0 0 20px rgba(155, 93, 229, 0.5);
+    }
+    
+    .loading-bar {
+        height: 100%;
+        width: 100%;
+        position: relative;
+    }
+    
+    .loading-progress {
+        height: 100%;
+        width: 0;
+        background: linear-gradient(90deg, #4ecdc4, #1a936f);
+        border-radius: 50px;
+        transition: width 1s;
+        box-shadow: 0 3px 10px rgba(26, 147, 111, 0.3);
+    }
+    
+    .loading-percentage {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-weight: bold;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+    
+    .loading-message {
+        text-align: center;
+        font-style: italic;
+        min-height: 60px;
+        font-size: 1.2rem;
+        color: #4a5568;
+        margin-bottom: 30px;
+        padding: 15px;
+        background: #f8fafc;
+        border-radius: 10px;
+        animation: textPop 0.5s;
+    }
+    
+    @keyframes textPop {
+        0% { transform: scale(0.9); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    
+    .loading-animation {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 30px;
+    }
+    
+    .loader-icon {
+        font-size: 3rem;
+        animation: spin 2s infinite linear;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .loader-icons {
+        display: flex;
+        gap: 15px;
+    }
+    
+    .loader-icons span {
+        font-size: 2rem;
+        animation: float 3s infinite ease-in-out;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-20px); }
+    }
+    
+    .loader-icons span:nth-child(1) { animation-delay: 0s; }
+    .loader-icons span:nth-child(2) { animation-delay: 0.5s; }
+    .loader-icons span:nth-child(3) { animation-delay: 1s; }
+    .loader-icons span:nth-child(4) { animation-delay: 1.5s; }
+</style>
+{% endblock %}

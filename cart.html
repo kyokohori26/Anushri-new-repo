@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Your Cart</h2>
+    <p>Selected Seat: <strong>{{ seat }}</strong> (next to bathroom)</p>
+    
+    <button id="remove-btn">Remove Seat</button>
+    
+    <div id="crying-seat" style="display: none; text-align: center; margin: 20px 0;">
+        <img src="https://media.giphy.com/media/l0HlG8vJXW0q5Q5iU/giphy.gif" alt="Crying seat" style="max-width: 200px;">
+        <audio id="cry-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-crying-man-388.mp3"></audio>
+        <p style="color: #e63946; font-weight: bold;">Dhokha! I thought we had something special...</p>
+    </div>
+    
+    <h3>Payment Summary</h3>
+    <ul class="fee-list">
+        <li>Ticket Price: <span>₹{{ fees.base_fare }}</span></li>
+        <li>Chair Usage Fee: <span>₹{{ fees.chair_usage }}</span></li>
+        <li>Ticket Printing Ink Fee: <span>₹{{ fees.digital_ink }}</span></li>
+        <li>Convenience Fee: <span>₹{{ fees.convenience_fee }}</span></li>
+        <li>Convenience Fee Convenience Fee: <span>₹{{ fees.convenience_fee_fee }}</span></li>
+        <li>Emotional Damage Surcharge: <span>₹{{ fees.emotional_damage }}</span></li>
+        <li>Total: <span>₹{{ fees.base_fare + fees.chair_usage + fees.digital_ink + fees.convenience_fee + fees.convenience_fee_fee + fees.emotional_damage }}</span></li>
+    </ul>
+    
+    <div class="timer" id="timer">02:00</div>
+    <div style="text-align: center;">
+        <button onclick="window.location.href='{{ url_for('payment') }}'">Proceed to Payment</button>
+    </div>
+
+    <script>
+        const removeBtn = document.getElementById('remove-btn');
+        const cryingSeat = document.getElementById('crying-seat');
+        
+        removeBtn.addEventListener('mouseover', () => {
+            cryingSeat.style.display = 'block';
+            document.getElementById('cry-sound').play();
+        });
+        
+        removeBtn.addEventListener('mouseout', () => {
+            cryingSeat.style.display = 'none';
+        });
+        
+        // Timer that resets on mouse movement
+        let timeLeft = 120;
+        const timer = document.getElementById('timer');
+        
+        function updateTimer() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        const timerInterval = setInterval(() => {
+            timeLeft--;
+            updateTimer();
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                alert("Session expired! Please start again.");
+                window.location.href = "{{ url_for('homepage') }}";
+            }
+        }, 1000);
+        
+        document.addEventListener('mousemove', () => {
+            timeLeft = 120;
+            updateTimer();
+        });
+    </script>
+{% endblock %}

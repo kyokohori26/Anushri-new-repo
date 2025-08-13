@@ -1,0 +1,503 @@
+{% extends "base.html" %}
+
+{% block head %}
+    <style>
+        /* Enhanced UI Styles */
+        .hero-section {
+            text-align: center;
+            padding: 30px 0;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+            border-radius: 0 0 30px 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            margin-bottom: 40px;
+            color: white;
+        }
+        
+        .hero-title {
+            font-size: 4rem;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.3);
+            background: linear-gradient(45deg, #ffd700, #ff9e00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: titleGlow 2s infinite alternate;
+        }
+        
+        @keyframes titleGlow {
+            0% { text-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
+            100% { text-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 30px rgba(255, 158, 0, 0.8); }
+        }
+        
+        .tagline {
+            font-size: 1.8rem;
+            margin: 20px 0 40px;
+            color: #ffd700;
+            font-style: italic;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        .tagline em {
+            font-weight: bold;
+            text-decoration: underline;
+        }
+        
+        .ad-container {
+            position: relative;
+            height: 200px;
+            margin: 40px auto;
+            background: linear-gradient(135deg, #ffe66d, #ffafcc);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 3px solid #ff6b6b;
+            max-width: 800px;
+        }
+        
+        .popcorn-ad {
+            position: absolute;
+            max-width: 90%;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            animation: adPulse 3s infinite;
+            display: none;
+            z-index: 5;
+        }
+        
+        @keyframes adPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .running-btn {
+            position: absolute;
+            padding: 20px 50px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #4ecdc4, #1a936f);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(26, 147, 111, 0.5);
+            transition: all 0.3s;
+            z-index: 20;
+            animation: buttonPulse 2s infinite;
+            font-family: 'Comic Sans MS', cursive;
+        }
+        
+        @keyframes buttonPulse {
+            0%, 100% { box-shadow: 0 8px 25px rgba(26, 147, 111, 0.5); }
+            50% { box-shadow: 0 8px 35px rgba(26, 147, 111, 0.8), 0 0 20px rgba(255, 255, 255, 0.6); }
+        }
+        
+        .running-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .puzzle-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: white;
+            padding: 40px;
+            border-radius: 25px;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+            transition: transform 0.5s, opacity 0.5s;
+            border: 5px solid #ffd700;
+            opacity: 0;
+        }
+        
+        .puzzle-popup.active {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+        
+        .puzzle-popup h3 {
+            font-size: 2.2rem;
+            margin-bottom: 25px;
+            color: #2b2d42;
+            background: linear-gradient(45deg, #ff6b6b, #e63946);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .kernels-container {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+        
+        .kernel {
+            font-size: 3.5rem;
+            padding: 20px;
+            border-radius: 20px;
+            cursor: grab;
+            transition: all 0.3s;
+            background: #f8f9fa;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            user-select: none;
+        }
+        
+        .kernel:hover {
+            transform: scale(1.15) rotate(5deg);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
+            background: #ffd700;
+        }
+        
+        .kernel.dragging {
+            opacity: 0.8;
+            transform: scale(1.2);
+        }
+        
+        .drop-zones {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .drop-zone {
+            min-height: 150px;
+            min-width: 120px;
+            border: 4px dashed #4ecdc4;
+            border-radius: 20px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            background: #f0f8ff;
+            position: relative;
+        }
+        
+        .drop-zone-label {
+            position: absolute;
+            top: 10px;
+            font-weight: bold;
+            color: #1a936f;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #ff6b6b, #e63946);
+            color: white;
+            border: none;
+            padding: 18px 50px;
+            border-radius: 50px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(230, 57, 70, 0.4);
+        }
+        
+        .submit-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 8px 30px rgba(230, 57, 70, 0.6);
+        }
+        
+        .countdown {
+            font-size: 1.5rem;
+            color: #e63946;
+            margin: 25px 0;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin: 50px 0;
+        }
+        
+        .feature-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            border-top: 5px solid #4ecdc4;
+            text-align: center;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .feature-icon {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            color: #ff6b6b;
+        }
+        
+        .feature-card h3 {
+            color: #2b2d42;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+        
+        .feature-card p {
+            color: #4a5568;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        
+        .floating {
+            animation: floating 3s infinite ease-in-out;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="hero-section">
+        <h1 class="hero-title">Queue-Kyun.com</h1>
+        <p class="tagline">Book your tickets... <em>agar himmat hai toh</em></p>
+        
+        <div class="ad-container">
+            <img class="popcorn-ad" src="https://fakeimg.pl/600x150/?text=Pappu's%20Popcorn%20Palace&font_size=40" 
+                 alt="Pappu's Popcorn Palace">
+            <button class="running-btn floating" 
+                    id="book-now-btn">
+                Book Now!
+            </button>
+        </div>
+    </div>
+
+    <div class="puzzle-popup" id="puzzle-popup">
+        <h3>Arrange popcorn by sanskaar level</h3>
+        <p>Drag the popcorn kernels to the appropriate virtue levels</p>
+        
+        <div class="drop-zones">
+            <div class="drop-zone" data-level="1">
+                <div class="drop-zone-label">Low Sanskaar</div>
+            </div>
+            <div class="drop-zone" data-level="2">
+                <div class="drop-zone-label">Medium Sanskaar</div>
+            </div>
+            <div class="drop-zone" data-level="3">
+                <div class="drop-zone-label">High Sanskaar</div>
+            </div>
+        </div>
+        
+        <div class="kernels-container">
+            <div draggable="true" class="kernel" data-level="3">🍿</div>
+            <div draggable="true" class="kernel" data-level="1">🍿</div>
+            <div draggable="true" class="kernel" data-level="2">🍿</div>
+            <div draggable="true" class="kernel" data-level="3">🍿</div>
+        </div>
+        
+        <button class="submit-btn" onclick="validatePuzzle()">Submit</button>
+        <div class="countdown" id="countdown">Time Left: 10 seconds</div>
+    </div>
+
+    <div class="features">
+        <div class="feature-card">
+            <div class="feature-icon">🏃‍♂️</div>
+            <h3>Running Buttons</h3>
+            <p>Our buttons have a mind of their own! Catch them if you can to start your booking adventure.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">🧩</div>
+            <h3>Sanskaar Puzzles</h3>
+            <p>Prove your virtue by arranging popcorn kernels by their level of sanskaar. A true test of character!</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">🎉</div>
+            <h3>Adventure Guaranteed</h3>
+            <p>Every booking is an epic quest filled with challenges, surprises, and bureaucratic wonders!</p>
+        </div>
+    </div>
+
+    <script>
+        // Create floating popcorn in background
+        for (let i = 0; i < 15; i++) {
+            const popcorn = document.createElement('div');
+            popcorn.className = 'kernel floating';
+            popcorn.style.position = 'fixed';
+            popcorn.style.left = `${Math.random() * 100}vw`;
+            popcorn.style.top = `${Math.random() * 100}vh`;
+            popcorn.style.fontSize = `${Math.random() * 2 + 1}rem`;
+            popcorn.style.opacity = Math.random() * 0.5 + 0.1;
+            popcorn.style.zIndex = '1';
+            popcorn.textContent = '🍿';
+            popcorn.style.pointerEvents = 'none';
+            document.body.appendChild(popcorn);
+        }
+        
+        // Button chasing game
+        let moveCount = 0;
+        const btn = document.getElementById('book-now-btn');
+        const ad = document.querySelector('.popcorn-ad');
+        const puzzlePopup = document.getElementById('puzzle-popup');
+        const countdown = document.getElementById('countdown');
+        
+        btn.addEventListener('mouseover', () => {
+            if (moveCount < 3) {
+                btn.style.top = `${Math.random() * 100 + 50}px`;
+                btn.style.left = `${Math.random() * 600 + 50}px`;
+                moveCount++;
+                
+                // Add visual effect
+                btn.style.animation = 'none';
+                setTimeout(() => {
+                    btn.style.animation = 'buttonPulse 2s infinite, floating 3s infinite ease-in-out';
+                }, 10);
+            } else {
+                ad.style.display = 'block';
+                setTimeout(() => {
+                    puzzlePopup.classList.add('active');
+                    startCountdown();
+                }, 1000);
+            }
+        });
+
+        // Puzzle game functionality
+        let timeLeft = 10;
+        let countdownInterval;
+        
+        function startCountdown() {
+            countdown.style.display = 'block';
+            timeLeft = 10;
+            countdown.textContent = `Time Left: ${timeLeft} seconds`;
+            
+            countdownInterval = setInterval(() => {
+                timeLeft--;
+                countdown.textContent = `Time Left: ${timeLeft} seconds`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    validatePuzzle();
+                }
+            }, 1000);
+        }
+        
+        // Make kernels draggable
+        const kernels = document.querySelectorAll('.kernel');
+        const dropZones = document.querySelectorAll('.drop-zone');
+        let draggedKernel = null;
+        
+        kernels.forEach(kernel => {
+            kernel.addEventListener('dragstart', function(e) {
+                draggedKernel = this;
+                this.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', this.dataset.level);
+            });
+            
+            kernel.addEventListener('dragend', function() {
+                this.classList.remove('dragging');
+            });
+        });
+        
+        dropZones.forEach(zone => {
+            zone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+            });
+            
+            zone.addEventListener('dragenter', function(e) {
+                e.preventDefault();
+                this.style.backgroundColor = '#e0f7fa';
+            });
+            
+            zone.addEventListener('dragleave', function() {
+                this.style.backgroundColor = '#f0f8ff';
+            });
+            
+            zone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.style.backgroundColor = '#f0f8ff';
+                
+                if (draggedKernel) {
+                    // Check if correct level
+                    const correctLevel = this.dataset.level === draggedKernel.dataset.level;
+                    
+                    // Add visual feedback
+                    draggedKernel.style.background = correctLevel ? '#c8e6c9' : '#ffcdd2';
+                    draggedKernel.style.boxShadow = correctLevel ? '0 0 20px #4caf50' : '0 0 20px #f44336';
+                    
+                    // Move kernel to drop zone
+                    this.appendChild(draggedKernel);
+                    draggedKernel.draggable = false;
+                }
+            });
+        });
+        
+        function validatePuzzle() {
+            clearInterval(countdownInterval);
+            
+            // Always fail the first time
+            const correctKernels = document.querySelectorAll('.drop-zone .kernel');
+            let correctCount = 0;
+            
+            correctKernels.forEach(kernel => {
+                const zone = kernel.closest('.drop-zone');
+                if (zone.dataset.level === kernel.dataset.level) {
+                    correctCount++;
+                }
+            });
+            
+            if (correctCount >= 3) {
+                // Success
+                puzzlePopup.innerHTML = `
+                    <h3>Success!</h3>
+                    <p style="font-size: 1.5rem; margin: 30px 0;">You've proven your virtue! Proceeding to booking...</p>
+                    <div style="font-size: 4rem; margin: 30px 0;">🎉</div>
+                `;
+                
+                setTimeout(() => {
+                    startBooking();
+                }, 2000);
+            } else {
+                // Failure
+                alert('FAIL. A loud buzzer sounds. You lack sufficient sanskaar!');
+                puzzlePopup.classList.remove('active');
+                btn.style.display = 'none';
+                countdown.style.display = 'none';
+                
+                setTimeout(() => {
+                    btn.style.display = 'block';
+                    moveCount = 0;
+                    puzzlePopup.classList.remove('active');
+                    puzzlePopup.innerHTML = document.getElementById('puzzle-popup').innerHTML;
+                }, 10000);
+            }
+        }
+
+        function startBooking() {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = "{{ url_for('search') }}";
+            
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'origin';
+            input.value = 'Delhi';
+            
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        btn.addEventListener('click', startBooking);
+    </script>
+{% endblock %}

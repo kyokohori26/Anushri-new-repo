@@ -1,0 +1,185 @@
+/* Base styles */
+body {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    background-color: #f0f8ff;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+h1, h2, h3 {
+    color: #ff6b6b;
+    text-align: center;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #4ecdc4;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s;
+    margin: 10px;
+}
+
+button:hover {
+    background-color: #ff6b6b;
+    transform: scale(1.05);
+}
+
+/* Homepage styles */
+.ad-container {
+    position: relative;
+    height: 100px;
+    margin: 30px 0;
+    background-color: #ffe66d;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.popcorn-ad {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    display: none;
+    animation: shake 0.5s infinite;
+}
+
+.running-btn {
+    position: absolute;
+    transition: all 0.5s;
+    z-index: 10;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* Puzzle popup */
+.puzzle-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+    z-index: 100;
+    display: none;
+}
+
+/* Seat selection styles */
+.seat-map {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 10px;
+    margin: 30px 0;
+}
+
+.seat {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    margin: 5px;
+    text-align: center;
+    line-height: 50px;
+    cursor: pointer;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.available { background-color: #1a936f; color: white; }
+.taken { background-color: #e63946; color: white; }
+.mla_quota { background-color: #9b5de5; color: white; }
+.bad_vastu { background-color: #00bbf9; color: white; }
+.cursed { background-color: #2b2d42; color: white; }
+.vacation { background-color: #ffafcc; }
+.haunted { 
+    background: repeating-linear-gradient(45deg, #2b2d42, #e63946 10px);
+    color: white;
+}
+
+.running-seat {
+    position: absolute;
+    transition: all 0.3s;
+}
+
+/* Cart styles */
+.fee-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.fee-list li {
+    padding: 8px;
+    border-bottom: 1px dashed #ccc;
+    display: flex;
+    justify-content: space-between;
+}
+
+.fee-list li:last-child {
+    border-bottom: none;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+/* Timer styles */
+.timer {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    color: #e63946;
+    margin: 20px 0;
+}
+
+/* Payment games */
+.game-container {
+    text-align: center;
+    margin: 30px 0;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 15px;
+}
+
+#nimbu-pani {
+    transition: all 0.2s;
+    height: 100px;
+}
+
+/* Confetti effect */
+.confetti {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    z-index: 100;
+    animation: fall linear forwards;
+}
+
+@keyframes fall {
+    to { top: 100vh; }
+}
+
+/* Error page */
+.politician-img {
+    width: 100%;
+    max-width: 400px;
+    display: block;
+    margin: 20px auto;
+    border-radius: 10px;
+}

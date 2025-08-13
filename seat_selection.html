@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seat Selection Battle Royale - Queue-Kyun.com</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', 'Marker Felt', 'Arial Rounded', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+            border: 5px solid #ffd700;
+        }
+        
+        .container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+            opacity: 0.3;
+            z-index: 0;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        h1 {
+            color: #ffd700;
+            font-size: 3.5rem;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+            background: linear-gradient(45deg, #ff8c00, #ffd700, #ff8c00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 2s infinite alternate;
+        }
+        
+        @keyframes glow {
+            0% { text-shadow: 0 0 5px #ffd700; }
+            100% { text-shadow: 0 0 20px #ffd700, 0 0 30px #ff8c00; }
+        }
+        
+        .subtitle {
+            color: #fff;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+        }
+        
+        .battle-info {
+            background: rgba(178, 31, 31, 0.3);
+            padding: 15px;
+            border-radius: 15px;
+            border: 2px solid #ff8c00;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        
+        .info-item {
+            color: #ffd700;
+            font-size: 1.2rem;
+            margin: 10px;
+            text-align: center;
+            min-width: 200px;
+        }
+        
+        .info-item span {
+            display: block;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 10px #ff8c00;
+        }
+        
+        .seat-map-container {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 3px solid #ff8c00;
+            position: relative;
+            min-height: 600px;
+            overflow: hidden;
+        }
+        
+        .seat-map {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 15px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .seat {
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            animation: float 3s infinite ease-in-out;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .seat::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 1;
+        }
+        
+        .seat span {
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+        }
+        
+        .available {
+            background: linear-gradient(135deg, #1a936f, #4ecdc4);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(26, 147, 111, 0.7); }
+            50% { box-shadow: 0 0 20px rgba(26, 147, 111, 1); }
+        }
+        
+        .taken {
+            background: linear-gradient(135deg, #e63946, #ff6b6b);
+        }
+        
+        .mla_quota {
+            background: linear-gradient(135deg, #9b5de5, #7209b7);
+        }
+        
+        .bad_vastu {
+            background: linear-gradient(135deg, #00bbf9, #0077b6);
+        }
+        
+        .cursed {
+            background: linear-gradient(135deg, #2b2d42, #000);
+        }
+        
+        .vacation {
+            background: linear-gradient(135deg, #ffafcc, #ff70a6);
+        }
+        
+        .haunted {
+            background: repeating-linear-gradient(
+                45deg,
+                #2b2d42,
+                #2b2d42 10px,
+                #e63946 10px,
+                #e63946 20px
+            );
+            animation: haunted 3s infinite;
+        }
+        
+        @keyframes haunted {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .status-key {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #ffd700;
+            margin-top: 30px;
+        }
+        
+        .key-title {
+            color: #ffd700;
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+        }
+        
+        .key-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .key-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .key-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            margin-right: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        .key-label {
+            color: #fff;
+            font-size: 1.1rem;
+        }
+        
+        .toilet {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: #8d99ae;
+            width: 120px;
+            height: 120px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #fff;
+            z-index: 3;
+            border: 3px solid #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            animation: flush 5s infinite;
+        }
+        
+        @keyframes flush {
+            0%, 100% { background: #8d99ae; }
+            50% { background: #00bbf9; }
+        }
+        
+        .battle-timer {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(230, 57, 70, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            z-index: 3;
+            border: 2px solid #ffd700;
+            box-shadow: 0 0 15px rgba(230, 57, 70, 0.7);
+        }
+        
+        .instructions {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 30px;
+            border: 2px solid #ffd700;
+        }
+        
+        .instructions h3 {
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+        
+        .instructions p {
+            color: #fff;
+            text-align: center;
+            font-size: 1.2rem;
+            line-height: 1.6;
+        }
+        
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .subtitle { font-size: 1.2rem; }
+            .seat { height: 60px; font-size: 1rem; }
+            .toilet { width: 80px; height: 80px; font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>SEAT SELECTION BATTLE ROYALE</h1>
+            <p class="subtitle">Choose your seat... if you can! May the odds be ever in your favor.</p>
+            
+            <div class="battle-info">
+                <div class="info-item">
+                    Available Seats: <span id="available-count">{{ available_seats }}</span>
+                </div>
+                <div class="info-item">
+                    Competitors: <span>{{ competitors }}</span>
+                </div>
+                <div class="info-item">
+                    Your Level: <span>Survivor {{ session.attempts }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="seat-map-container">
+            <div class="battle-timer">
+                ⏱️ Time Left: <span id="timer">02:00</span>
+            </div>
+            
+            <div class="seat-map">
+                {% for seat, status in seats.items() %}
+                    <div class="seat {{ status }}" 
+                         id="{{ seat }}"
+                         onclick="selectSeat('{{ seat }}', '{{ status }}')">
+                        <span>{{ seat }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <div class="toilet">
+                🚽<br>BATHROOM
+            </div>
+        </div>
+        
+        <div class="status-key">
+            <h2 class="key-title">SEAT STATUS KEY</h2>
+            <div class="key-items">
+                <div class="key-item">
+                    <div class="key-color available"></div>
+                    <div class="key-label">Available (Theoretically)</div>
+                </div>
+                <div class="key-item">
+                    <div class="key-color taken"></div>
+                    <div class="key-label">Taken</div>
+                </div>
+                <div class="key-item">
+                    <div class="key-color mla_quota"></div>
+                    <div class="key-label">MLA Quota</div>
+                </div>
+                <div class="key-item">
+                    <div class="key-color bad_vastu"></div>
+                    <div class="key-label">Bad Vastu</div>
+                </div>
+                <div class="key-item">
+                    <div class="key-color cursed"></div>
+                    <div class="key-label">Cursed by Baba</div>
+                </div>
+                <div class="key-item">
+                    <div class="key-color vacation"></div>
+                    <div class="key-label">Vacation in Goa</div>
+                </div>
+                <div class="key-item">
+                    <div class="key-color haunted"></div>
+                    <div class="key-label">Haunted (Avoid!)</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>BATTLE INSTRUCTIONS</h3>
+            <p>
+                🎯 Click on <span style="color: #4ecdc4; font-weight: bold;">GREEN</span> seats to select them<br>
+                🏃‍♂️ Seats will try to escape when you hover over them<br>
+                😱 Avoid the <span style="color: #e63946; font-weight: bold;">HAUNTED</span> seat F-13!<br>
+                ⏱️ You have 2 minutes to select a seat before timeout
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        // Timer functionality
+        let timeLeft = 120;
+        const timer = document.getElementById('timer');
+        
+        function updateTimer() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeLeft <= 0) {
+                alert("Time's up! Session expired.");
+                window.location.href = "{{ url_for('session_timeout') }}";
+            }
+        }
+        
+        const timerInterval = setInterval(() => {
+            timeLeft--;
+            updateTimer();
+        }, 1000);
+        
+        // Seat hover behavior
+        document.querySelectorAll('.seat.available').forEach(seat => {
+            seat.addEventListener('mouseover', function() {
+                // Make seat run away
+                this.style.transform = 'translate(0, 0)';
+                this.style.transition = 'all 0.5s ease';
+                
+                // Calculate new position within container
+                const container = document.querySelector('.seat-map-container');
+                const maxX = container.clientWidth - this.clientWidth;
+                const maxY = container.clientHeight - this.clientHeight;
+                
+                const newX = Math.random() * maxX;
+                const newY = Math.random() * maxY;
+                
+                this.style.transform = `translate(${newX}px, ${newY}px)`;
+                
+                // Sometimes change status
+                if (Math.random() > 0.7) {
+                    this.classList.remove('available');
+                    this.classList.add('taken');
+                    this.innerHTML = '<span>TAKEN!</span>';
+                    
+                    // Update available count
+                    const countElement = document.getElementById('available-count');
+                    countElement.textContent = parseInt(countElement.textContent) - 1;
+                }
+            });
+        });
+        
+        function selectSeat(seatId, status) {
+            if (status === 'haunted') {
+                // Play spooky sound
+                const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-horror-laugh-428.mp3');
+                audio.play();
+                
+                // Visual effects
+                const hauntedSeat = document.getElementById(seatId);
+                hauntedSeat.style.animation = 'none';
+                hauntedSeat.style.transform = 'scale(1.5)';
+                hauntedSeat.style.background = 'repeating-linear-gradient(45deg, #000, #e63946)';
+                
+                setTimeout(() => {
+                    alert("Server... is... down...");
+                    hauntedSeat.style.transform = '';
+                    hauntedSeat.style.animation = 'haunted 3s infinite';
+                }, 500);
+                
+                return;
+            }
+            
+            if (status !== 'available') {
+                const messages = [
+                    "Got your spot, Mogambo! 😂",
+                    "Yeh area humara hai!",
+                    "VIP quota! Aap nahi le sakte!",
+                    "This seat is on vacation in Goa!",
+                    "Baba's curse is upon this seat!"
+                ];
+                
+                // Visual feedback
+                const seat = document.getElementById(seatId);
+                seat.style.transform = 'scale(1.1)';
+                seat.style.boxShadow = '0 0 30px #ffd700';
+                
+                setTimeout(() => {
+                    seat.style.transform = '';
+                    seat.style.boxShadow = '';
+                    alert(messages[Math.floor(Math.random() * messages.length)]);
+                }, 300);
+                
+                return;
+            }
+            
+            // Success - add to cart
+            const seat = document.getElementById(seatId);
+            seat.style.animation = 'none';
+            seat.style.transform = 'scale(1.2)';
+            seat.style.boxShadow = '0 0 30px #4ecdc4';
+            seat.innerHTML = '<span>SELECTED!</span>';
+            
+            setTimeout(() => {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = "{{ url_for('add_to_cart') }}";
+                
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'seat_id';
+                input.value = seatId;
+                
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
+            }, 1000);
+        }
+        
+        // Initialize available seats count
+        document.addEventListener('DOMContentLoaded', function() {
+            const availableSeats = document.querySelectorAll('.seat.available').length;
+            document.getElementById('available-count').textContent = availableSeats;
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,863 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="trials-container">
+    <h1 class="trials-title">Final Trials of Patience</h1>
+    <div class="subtitle">Prove your worth to complete your booking!</div>
+    
+    <div class="trial-progress">
+        <div class="progress-step active" id="step1">1</div>
+        <div class="progress-step" id="step2">2</div>
+        <div class="progress-step" id="step3">3</div>
+    </div>
+    
+    <!-- Gilli Danda Game -->
+    <div class="trial-card" id="gilli-trial">
+        <h2>Gilli Danda Challenge</h2>
+        <p>Hit the flying Gilli with your Danda to prove your focus!</p>
+        
+        <div class="game-area">
+            <canvas id="gilliCanvas" width="500" height="200"></canvas>
+            <div class="controls">
+                <button class="play-btn" onclick="startGilliDanda()">Start Challenge</button>
+                <div class="score">Hits: <span id="hits">0</span>/3</div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>How to Play:</h3>
+            <ul>
+                <li>Click the <strong>Start Challenge</strong> button</li>
+                <li>Click on the canvas when the Gilli is over the Danda</li>
+                <li>Hit the Gilli 3 times to win!</li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Nimbu Pani Game -->
+    <div class="trial-card" id="nimbu-trial" style="display:none;">
+        <h2>Nimbu Pani Challenge</h2>
+        <p>Balance the glass of lemonade for 5 seconds without spilling!</p>
+        
+        <div class="game-area">
+            <div class="balance-game">
+                <div class="hand" id="hand">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3081/3081980.png" alt="Nimbu Pani" id="nimbu-pani">
+                </div>
+                <div class="balance-meter">
+                    <div class="balance-indicator" id="balance-indicator"></div>
+                </div>
+            </div>
+            <div class="timer" id="nimbu-timer">5s</div>
+        </div>
+        
+        <div class="controls">
+            <button class="play-btn" onclick="startNimbuGame()">Start Balancing</button>
+            <div class="score">Balance Time: <span id="balance-time">0</span>s</div>
+        </div>
+        
+        <div class="instructions">
+            <h3>How to Play:</h3>
+            <ul>
+                <li>Click the <strong>Start Balancing</strong> button</li>
+                <li>Keep your mouse steady - the glass will wobble!</li>
+                <li>Maintain balance for 5 seconds to succeed</li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- OTP Section -->
+    <div class="trial-card" id="otp-trial" style="display:none;">
+        <h2>The Great OTP Quest</h2>
+        <p>Choose how you'd like to receive your One-Time Password</p>
+        
+        <div class="otp-options">
+            <div class="otp-method" data-method="sms">
+                <div class="method-icon">📱</div>
+                <h3>SMS Delivery</h3>
+                <p>2-3 business hours (maybe)</p>
+                <div class="delivery-estimate">ETA: When pigs fly</div>
+            </div>
+            
+            <div class="otp-method" data-method="postcard">
+                <div class="method-icon">📬</div>
+                <h3>Postcard</h3>
+                <p>4-5 business days</p>
+                <div class="delivery-estimate">ETA: After next monsoon</div>
+            </div>
+            
+            <div class="otp-method" data-method="pigeon">
+                <div class="method-icon">🐦</div>
+                <h3>Pigeon Post</h3>
+                <p>Whenever it feels like it</p>
+                <div class="delivery-estimate">ETA: Pigeon's mood pending</div>
+            </div>
+            
+            <div class="otp-method" data-method="whisper">
+                <div class="method-icon">👤</div>
+                <h3>Whispered by Stranger</h3>
+                <p>May ask for chai-paani</p>
+                <div class="delivery-estimate">ETA: When he finds you</div>
+            </div>
+        </div>
+        
+        <div class="otp-controls">
+            <button class="send-btn" onclick="sendOTP()">Send OTP</button>
+            
+            <div class="otp-input" id="otp-input">
+                <input type="text" id="otp" placeholder="Enter OTP" maxlength="6">
+                <button onclick="verifyOTP()">Submit</button>
+            </div>
+        </div>
+        
+        <div class="bunty-chat" id="bunty-chat">
+            <div class="chat-header">
+                <div class="avatar">B</div>
+                <h3>Bunty - Customer "Support"</h3>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <div class="message received">
+                    <img src="https://media.giphy.com/media/l0HlG8vJXW0q5Q5iU/giphy.gif" alt="Bunty waiting">
+                    <p>Choose how you want your OTP! I'll wait...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Gilli Danda Game
+    function startGilliDanda() {
+        const canvas = document.getElementById('gilliCanvas');
+        const ctx = canvas.getContext('2d');
+        let gilliX = 0;
+        let gilliY = 90;
+        const dandaX = 200;
+        const dandaY = 150;
+        const dandaWidth = 100;
+        const gilliWidth = 30;
+        let hits = 0;
+        let gameActive = true;
+        
+        // Clear previous game
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw background
+        ctx.fillStyle = '#e0f7fa';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw ground
+        ctx.fillStyle = '#8bc34a';
+        ctx.fillRect(0, canvas.height - 30, canvas.width, 30);
+        
+        // Draw danda (big stick)
+        ctx.fillStyle = '#5d4037';
+        ctx.fillRect(dandaX, dandaY, dandaWidth, 15);
+        
+        // Draw player
+        ctx.fillStyle = '#3f51b5';
+        ctx.beginPath();
+        ctx.arc(dandaX + 50, dandaY - 40, 20, 0, Math.PI * 2);
+        ctx.fill();
+        
+        function draw() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw background
+            ctx.fillStyle = '#e0f7fa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw ground
+            ctx.fillStyle = '#8bc34a';
+            ctx.fillRect(0, canvas.height - 30, canvas.width, 30);
+            
+            // Draw danda (big stick)
+            ctx.fillStyle = '#5d4037';
+            ctx.fillRect(dandaX, dandaY, dandaWidth, 15);
+            
+            // Draw player
+            ctx.fillStyle = '#3f51b5';
+            ctx.beginPath();
+            ctx.arc(dandaX + 50, dandaY - 40, 20, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw gilli (small stick)
+            ctx.fillStyle = '#ff9800';
+            ctx.fillRect(gilliX, gilliY, gilliWidth, 10);
+        }
+        
+        function moveGilli() {
+            if (!gameActive) return;
+            
+            gilliX += 5;
+            if (gilliX > canvas.width) gilliX = -gilliWidth;
+            
+            draw();
+            requestAnimationFrame(moveGilli);
+        }
+        
+        function advanceToNext() {
+            if (!gameActive) return;
+            gameActive = false;
+            document.getElementById('gilli-trial').style.display = 'none';
+            document.getElementById('nimbu-trial').style.display = 'block';
+            document.getElementById('step1').classList.remove('active');
+            document.getElementById('step2').classList.add('active');
+        }
+        
+        canvas.addEventListener('click', (e) => {
+            if (!gameActive) return;
+            
+            // Get click position
+            const rect = canvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+            
+            // Check if click hit the gilli
+            if (clickX >= gilliX && clickX <= gilliX + gilliWidth &&
+                clickY >= gilliY && clickY <= gilliY + 10) {
+                
+                // Play success sound
+                new Audio('https://assets.mixkit.co/sfx/preview/mixkit-martial-arts-punch-2051.mp3').play();
+                
+                // Increase hit count
+                hits++;
+                document.getElementById('hits').textContent = hits;
+                
+                // Visual effect
+                ctx.fillStyle = 'rgba(76, 175, 80, 0.5)';
+                ctx.fillRect(gilliX, gilliY, gilliWidth, 10);
+                
+                // Reset gilli position
+                gilliX = -gilliWidth;
+                
+                // Check if player won
+                if (hits >= 3) {
+                    setTimeout(advanceToNext, 1000);
+                }
+            }
+        });
+        
+        draw();
+        moveGilli();
+        
+        // Auto-advance after 30 seconds
+        setTimeout(() => {
+            if (gameActive) {
+                alert("Time's up! Moving to next challenge...");
+                advanceToNext();
+            }
+        }, 30000);
+    }
+    
+    // Nimbu Pani Game
+    function startNimbuGame() {
+        const glass = document.getElementById('nimbu-pani');
+        const indicator = document.getElementById('balance-indicator');
+        const timerEl = document.getElementById('nimbu-timer');
+        const timeEl = document.getElementById('balance-time');
+        
+        let angle = 0;
+        let balanceTime = 0;
+        let gameActive = true;
+        let success = false;
+        
+        // Reset elements
+        glass.style.transform = 'rotate(0deg)';
+        indicator.style.width = '50%';
+        timerEl.textContent = '5s';
+        timeEl.textContent = '0';
+        
+        // Start countdown
+        let countdown = 5;
+        const countdownInterval = setInterval(() => {
+            countdown--;
+            timerEl.textContent = countdown + 's';
+            if (countdown <= 0) {
+                clearInterval(countdownInterval);
+                if (gameActive) {
+                    success = true;
+                    endNimbuGame();
+                }
+            }
+        }, 1000);
+        
+        // Movement tracking
+        let lastX = 0;
+        let lastY = 0;
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!gameActive) return;
+            
+            // Calculate movement
+            const deltaX = e.clientX - lastX;
+            const deltaY = e.clientY - lastY;
+            const movement = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            
+            // Update angle based on movement
+            angle += (movement * 0.1) * (Math.random() > 0.5 ? 1 : -1);
+            angle = Math.max(-45, Math.min(45, angle));
+            
+            // Update glass and indicator
+            glass.style.transform = `rotate(${angle}deg)`;
+            indicator.style.width = `${50 - (Math.abs(angle) / 45) * 50}%`;
+            indicator.style.background = angle > 0 ? '#4caf50' : '#f44336';
+            
+            // Update balance time if within safe range
+            if (Math.abs(angle) < 15) {
+                balanceTime += 0.1;
+                timeEl.textContent = balanceTime.toFixed(1);
+            }
+            
+            // Check if spilled
+            if (Math.abs(angle) > 30) {
+                gameActive = false;
+                glass.style.transform = `rotate(${angle > 0 ? 45 : -45}deg)`;
+                setTimeout(() => {
+                    alert("Spill ho gaya! Try again!");
+                    window.location.reload();
+                }, 500);
+            }
+            
+            // Update last position
+            lastX = e.clientX;
+            lastY = e.clientY;
+        });
+        
+        function endNimbuGame() {
+            gameActive = false;
+            if (success) {
+                glass.style.transform = 'rotate(0deg)';
+                indicator.style.width = '50%';
+                indicator.style.background = '#4caf50';
+                setTimeout(() => {
+                    document.getElementById('nimbu-trial').style.display = 'none';
+                    document.getElementById('otp-trial').style.display = 'block';
+                    document.getElementById('step2').classList.remove('active');
+                    document.getElementById('step3').classList.add('active');
+                }, 1500);
+            }
+        }
+    }
+    
+    // OTP Functions
+    function sendOTP() {
+        const method = document.querySelector('.otp-method.selected').dataset.method;
+        const messages = {
+            sms: "Sending SMS via carrier pigeon... just kidding!",
+            postcard: "Searching for a vintage postage stamp...",
+            pigeon: "Pigeon union is on strike! Negotiating...",
+            whisper: "Stranger is stuck in traffic! Please wait..."
+        };
+        
+        // Show sending message
+        const chatMessages = document.getElementById('chat-messages');
+        chatMessages.innerHTML += `
+            <div class="message sent">
+                <p>Please send OTP via ${method}</p>
+            </div>
+            <div class="message received">
+                <img src="https://media.giphy.com/media/3o7TKsQ8UQ4l4LhGz6/giphy.gif" alt="Bunty processing">
+                <p>${messages[method]}</p>
+            </div>
+        `;
+        
+        // Scroll to bottom
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        // Show OTP input after delay
+        setTimeout(() => {
+            document.getElementById('otp-input').style.display = 'flex';
+            chatMessages.innerHTML += `
+                <div class="message received">
+                    <img src="https://media.giphy.com/media/3o7TKYnjG9bcRA5nD2/giphy.gif" alt="Bunty sending">
+                    <p>OTP sent! But it might be wrong... 😜</p>
+                </div>
+            `;
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }, 3000);
+    }
+    
+    function verifyOTP() {
+        const otp = document.getElementById('otp').value;
+        const chatMessages = document.getElementById('chat-messages');
+        
+        // Show verification message
+        chatMessages.innerHTML += `
+            <div class="message sent">
+                <p>My OTP is: ${otp}</p>
+            </div>
+            <div class="message received">
+                <img src="https://media.giphy.com/media/3o7TKsQ8UQ4l4LhGz6/giphy.gif" alt="Bunty processing">
+                <p>Verifying your OTP...</p>
+            </div>
+        `;
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        // Randomly fail or succeed
+        setTimeout(() => {
+            if (Math.random() > 0.3 && otp.length === 6) {
+                // Success
+                chatMessages.innerHTML += `
+                    <div class="message received">
+                        <img src="https://media.giphy.com/media/3o6Zt6KHxJTbqlZg5a/giphy.gif" alt="Bunty celebrating">
+                        <p>Success! Redirecting to confirmation...</p>
+                    </div>
+                `;
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                // Submit form
+                setTimeout(() => {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = "{{ url_for('verify_otp') }}";
+                    
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'otp';
+                    input.value = otp;
+                    
+                    form.appendChild(input);
+                    document.body.appendChild(form);
+                    form.submit();
+                }, 2000);
+            } else {
+                // Failure
+                chatMessages.innerHTML += `
+                    <div class="message received">
+                        <img src="https://media.giphy.com/media/l0HlG8vJXW0q5Q5iU/giphy.gif" alt="Bunty crying">
+                        <p>INCORRECT OTP! Try again or choose another method!</p>
+                    </div>
+                `;
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                document.getElementById('otp').value = '';
+            }
+        }, 2000);
+    }
+    
+    // Initialize OTP method selection
+    document.querySelectorAll('.otp-method').forEach(method => {
+        method.addEventListener('click', () => {
+            document.querySelectorAll('.otp-method').forEach(m => m.classList.remove('selected'));
+            method.classList.add('selected');
+        });
+    });
+    
+    // Select first method by default
+    document.querySelector('.otp-method').classList.add('selected');
+</script>
+
+<style>
+    /* Base styles */
+    .trials-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 30px;
+        background: linear-gradient(135deg, #f5f7fa, #e4edf9);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .trials-title {
+        text-align: center;
+        color: #2b2d42;
+        font-size: 2.8rem;
+        margin-bottom: 10px;
+        background: linear-gradient(45deg, #1a2a6c, #b21f1f);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .subtitle {
+        text-align: center;
+        color: #4a5568;
+        font-size: 1.4rem;
+        margin-bottom: 40px;
+        font-style: italic;
+    }
+    
+    .trial-progress {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        margin-bottom: 40px;
+    }
+    
+    .progress-step {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #718096;
+        position: relative;
+    }
+    
+    .progress-step.active {
+        background: #4ecdc4;
+        color: white;
+        box-shadow: 0 0 15px rgba(78, 205, 196, 0.5);
+    }
+    
+    .progress-step:not(:last-child)::after {
+        content: "";
+        position: absolute;
+        width: 40px;
+        height: 4px;
+        background: #e2e8f0;
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    
+    .trial-card {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+        border-top: 5px solid #4ecdc4;
+    }
+    
+    .trial-card h2 {
+        color: #2b2d42;
+        text-align: center;
+        margin-bottom: 15px;
+        font-size: 2rem;
+    }
+    
+    .trial-card p {
+        text-align: center;
+        color: #4a5568;
+        margin-bottom: 25px;
+    }
+    
+    .game-area {
+        background: #f8fafc;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 25px;
+        border: 2px dashed #cbd5e0;
+    }
+    
+    #gilliCanvas {
+        display: block;
+        margin: 0 auto;
+        background: #e0f7fa;
+        border-radius: 10px;
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 30px;
+        margin-top: 20px;
+    }
+    
+    .play-btn {
+        background: #4ecdc4;
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .play-btn:hover {
+        background: #1a936f;
+        transform: scale(1.05);
+    }
+    
+    .score {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #2b2d42;
+        background: #f0f8ff;
+        padding: 8px 20px;
+        border-radius: 50px;
+    }
+    
+    .instructions {
+        background: #f0f8ff;
+        border-radius: 15px;
+        padding: 20px;
+        border-left: 4px solid #4ecdc4;
+    }
+    
+    .instructions h3 {
+        color: #2b2d42;
+        margin-bottom: 10px;
+    }
+    
+    .instructions ul {
+        padding-left: 20px;
+        color: #4a5568;
+    }
+    
+    .instructions li {
+        margin-bottom: 8px;
+    }
+    
+    /* Nimbu Pani Game */
+    .balance-game {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 50px;
+        margin-bottom: 30px;
+    }
+    
+    .hand {
+        width: 150px;
+        height: 200px;
+        position: relative;
+    }
+    
+    #nimbu-pani {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        transition: transform 0.1s;
+    }
+    
+    .balance-meter {
+        width: 30px;
+        height: 200px;
+        background: #e2e8f0;
+        border-radius: 15px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .balance-indicator {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 50%;
+        background: #4caf50;
+        border-radius: 15px;
+    }
+    
+    .timer {
+        text-align: center;
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #e63946;
+        margin-bottom: 20px;
+    }
+    
+    /* OTP Section */
+    .otp-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .otp-method {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s;
+        border: 2px solid #e2e8f0;
+        cursor: pointer;
+    }
+    
+    .otp-method.selected {
+        border: 3px solid #4ecdc4;
+        background: #f0f8ff;
+        transform: scale(1.03);
+    }
+    
+    .otp-method:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    }
+    
+    .method-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+    }
+    
+    .otp-method h3 {
+        color: #2b2d42;
+        margin-bottom: 10px;
+        font-size: 1.3rem;
+    }
+    
+    .otp-method p {
+        color: #4a5568;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+    }
+    
+    .delivery-estimate {
+        font-size: 0.8rem;
+        color: #e63946;
+        font-style: italic;
+    }
+    
+    .otp-controls {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .send-btn {
+        background: #ff6b6b;
+        color: white;
+        border: none;
+        padding: 15px 40px;
+        border-radius: 50px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .send-btn:hover {
+        background: #e63946;
+        transform: scale(1.05);
+    }
+    
+    .otp-input {
+        display: none;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .otp-input input {
+        padding: 12px 20px;
+        font-size: 1.2rem;
+        border: 2px solid #4ecdc4;
+        border-radius: 10px;
+        width: 200px;
+        text-align: center;
+    }
+    
+    .otp-input button {
+        background: #4ecdc4;
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        cursor: pointer;
+    }
+    
+    /* Bunty Chat */
+    .bunty-chat {
+        background: #f8f9fa;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .chat-header {
+        background: #4ecdc4;
+        color: white;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .avatar {
+        width: 40px;
+        height: 40px;
+        background: #1a936f;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+    
+    .chat-messages {
+        height: 250px;
+        overflow-y: auto;
+        padding: 20px;
+    }
+    
+    .message {
+        display: flex;
+        margin-bottom: 20px;
+        max-width: 80%;
+    }
+    
+    .message.received {
+        align-self: flex-start;
+    }
+    
+    .message.sent {
+        align-self: flex-end;
+        margin-left: auto;
+        flex-direction: row-reverse;
+    }
+    
+    .message img {
+        width: 60px;
+        height: 60px;
+        border-radius: 10px;
+        margin-right: 15px;
+    }
+    
+    .message.sent img {
+        margin-right: 0;
+        margin-left: 15px;
+    }
+    
+    .message p {
+        background: white;
+        padding: 15px;
+        border-radius: 15px;
+        margin: 0;
+        text-align: left;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .message.received p {
+        border-top-left-radius: 0;
+    }
+    
+    .message.sent p {
+        background: #4ecdc4;
+        color: white;
+        border-top-right-radius: 0;
+    }
+    
+    @media (max-width: 768px) {
+        .trials-container {
+            padding: 20px;
+        }
+        
+        .trials-title {
+            font-size: 2.2rem;
+        }
+        
+        .balance-game {
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .otp-options {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}

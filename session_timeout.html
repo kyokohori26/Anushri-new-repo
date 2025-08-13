@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Expired - Queue-Kyun.com</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', 'Marker Felt', 'Arial Rounded', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+        
+        .timeout-container {
+            background: white;
+            width: 90%;
+            max-width: 800px;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 2;
+            animation: float 8s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .timeout-header {
+            background: linear-gradient(135deg, #4ecdc4, #1a936f);
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .timeout-header h1 {
+            color: white;
+            font-size: 3.5rem;
+            text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.2);
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .timeout-header::before {
+            content: "⏱️⏱️⏱️";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            font-size: 8rem;
+            opacity: 0.2;
+            z-index: 1;
+            animation: spin 20s infinite linear;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .content {
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .message {
+            font-size: 1.8rem;
+            color: #2b2d42;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 20px;
+            border: 3px dashed #4ecdc4;
+            position: relative;
+            animation: wobble 5s infinite;
+        }
+        
+        @keyframes wobble {
+            0%, 100% { transform: rotate(-1deg); }
+            25% { transform: rotate(1deg); }
+            50% { transform: rotate(-0.5deg); }
+            75% { transform: rotate(0.5deg); }
+        }
+        
+        .message::before {
+            content: "💬";
+            position: absolute;
+            top: -25px;
+            left: 20px;
+            font-size: 2.5rem;
+            background: white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid #4ecdc4;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .politician-section {
+            margin: 40px 0;
+            padding: 30px;
+            background: linear-gradient(135deg, #ffd6ff, #e7c6ff);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            animation: scalePulse 4s infinite;
+        }
+        
+        @keyframes scalePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        
+        .politician-img {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 15px;
+            border: 5px solid white;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.5s;
+        }
+        
+        .politician-img:hover {
+            transform: rotate(3deg) scale(1.05);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .quote {
+            font-size: 2rem;
+            color: #ff6b6b;
+            margin-top: 20px;
+            font-style: italic;
+            text-shadow: 1px 1px 0 white;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .quote::before, .quote::after {
+            content: '"';
+            font-size: 3rem;
+            color: #ff6b6b;
+        }
+        
+        .btn-container {
+            margin: 30px 0;
+        }
+        
+        .restart-btn {
+            background: linear-gradient(135deg, #ff6b6b, #e63946);
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: 1.8rem;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 15px 30px rgba(230, 57, 70, 0.3);
+            transition: all 0.3s;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 15px 30px rgba(230, 57, 70, 0.3); }
+            50% { transform: scale(1.05); box-shadow: 0 20px 40px rgba(230, 57, 70, 0.5); }
+        }
+        
+        .restart-btn:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 20px 40px rgba(230, 57, 70, 0.5);
+        }
+        
+        .restart-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .restart-btn::after {
+            content: "🔄";
+            margin-left: 15px;
+            font-size: 2rem;
+        }
+        
+        .floating {
+            animation: floating 3s infinite ease-in-out;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .footer {
+            background: #2b2d42;
+            color: white;
+            padding: 25px;
+            text-align: center;
+            font-size: 1.2rem;
+            position: relative;
+        }
+        
+        .footer::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: repeating-linear-gradient(45deg, #ff6b6b, #ff6b6b 10px, #4ecdc4 10px, #4ecdc4 20px);
+        }
+        
+        .bubbles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            overflow: hidden;
+        }
+        
+        .bubble {
+            position: absolute;
+            bottom: -100px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            animation: rise 10s infinite ease-in;
+        }
+        
+        .bubble:nth-child(1) {
+            width: 40px;
+            height: 40px;
+            left: 10%;
+            animation-duration: 8s;
+        }
+        
+        .bubble:nth-child(2) {
+            width: 20px;
+            height: 20px;
+            left: 20%;
+            animation-duration: 5s;
+            animation-delay: 1s;
+        }
+        
+        .bubble:nth-child(3) {
+            width: 50px;
+            height: 50px;
+            left: 35%;
+            animation-duration: 7s;
+            animation-delay: 2s;
+        }
+        
+        .bubble:nth-child(4) {
+            width: 80px;
+            height: 80px;
+            left: 50%;
+            animation-duration: 11s;
+            animation-delay: 0s;
+        }
+        
+        .bubble:nth-child(5) {
+            width: 35px;
+            height: 35px;
+            left: 55%;
+            animation-duration: 6s;
+            animation-delay: 1s;
+        }
+        
+        .bubble:nth-child(6) {
+            width: 45px;
+            height: 45px;
+            left: 65%;
+            animation-duration: 8s;
+            animation-delay: 3s;
+        }
+        
+        .bubble:nth-child(7) {
+            width: 25px;
+            height: 25px;
+            left: 75%;
+            animation-duration: 7s;
+            animation-delay: 2s;
+        }
+        
+        .bubble:nth-child(8) {
+            width: 80px;
+            height: 80px;
+            left: 80%;
+            animation-duration: 12s;
+            animation-delay: 1s;
+        }
+        
+        .bubble:nth-child(9) {
+            width: 15px;
+            height: 15px;
+            left: 70%;
+            animation-duration: 5s;
+            animation-delay: 1s;
+        }
+        
+        .bubble:nth-child(10) {
+            width: 50px;
+            height: 50px;
+            left: 85%;
+            animation-duration: 9s;
+            animation-delay: 0s;
+        }
+        
+        @keyframes rise {
+            0% {
+                bottom: -100px;
+                transform: translateX(0);
+            }
+            50% {
+                transform: translateX(100px);
+            }
+            100% {
+                bottom: 1080px;
+                transform: translateX(-200px);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .timeout-header h1 { font-size: 2.5rem; }
+            .message { font-size: 1.4rem; }
+            .quote { font-size: 1.6rem; }
+            .restart-btn { font-size: 1.5rem; padding: 15px 30px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated background bubbles -->
+    <div class="bubbles">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+    </div>
+    
+    <div class="timeout-container floating">
+        <div class="timeout-header">
+            <h1>SESSION EXPIRED!</h1>
+        </div>
+        
+        <div class="content">
+            <div class="message">
+                It seems you took too long. But don't worry, we believe in second chances!<br>
+                Your booking adventure awaits once more...
+            </div>
+            
+            <div class="politician-section">
+                <img class="politician-img floating" src="https://fakeimg.pl/600x300/?text=Ache%20Din%20are%20coming" alt="Smiling politician">
+                <p class="quote">"Acche Din are coming"</p>
+            </div>
+            
+            <div class="btn-container">
+                <button class="restart-btn" onclick="window.location.href='{{ url_for('homepage') }}'">
+                    RESTART YOUR QUEST
+                </button>
+            </div>
+        </div>
+        
+        <div class="footer">
+            Queue-Kyun.com - Agar himmat hai toh book karo!
+        </div>
+    </div>
+    
+    <script>
+        // Add floating animation to politician image
+        const politicianImg = document.querySelector('.politician-img');
+        setInterval(() => {
+            politicianImg.classList.toggle('floating');
+        }, 3000);
+        
+        // Add wobble effect to the message
+        const message = document.querySelector('.message');
+        setInterval(() => {
+            message.style.transform = 'rotate(' + (Math.random() * 4 - 2) + 'deg)';
+            setTimeout(() => {
+                message.style.transform = 'rotate(0deg)';
+            }, 500);
+        }, 3000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div id="confirmation">
+        <h1>CONGRATULATIONS!</h1>
+        <p style="text-align: center; font-size: 24px;">You have successfully submitted your booking request for review.</p>
+        
+        <div style="background: #e9f5db; padding: 20px; border-radius: 15px; text-align: center; margin: 30px 0;">
+            <p>Your application has been assigned Token No. <strong>{{ token }}</strong></p>
+            <p>A committee will be formed within 3-5 business days to assess the validity of your claim.</p>
+            <p>You may check the status after the next full moon by sending a fax to our regional office.</p>
+        </div>
+        
+        <div style="text-align: center;">
+            <button onclick="printForm()">Print Application Form</button>
+        </div>
+    </div>
+
+    <script>
+        // Confetti effect
+        for (let i = 0; i < 150; i++) {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+            confetti.style.left = `${Math.random() * 100}vw`;
+            confetti.style.top = '-10px';
+            confetti.style.animation = `fall ${Math.random() * 3 + 2}s linear forwards`;
+            document.body.appendChild(confetti);
+        }
+        
+        // Play distorted trumpet sound
+        setTimeout(() => {
+            const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-funny-fail-low-tone-2876.mp3');
+            audio.play();
+        }, 1000);
+        
+        function printForm() {
+            // Fake 404 error
+            window.location.href = "{{ url_for('session_timeout') }}";
+        }
+        
+        // Redirect to timeout after 10 seconds
+        setTimeout(() => {
+            window.location.href = "{{ url_for('session_timeout') }}";
+        }, 10000);
+    </script>
+{% endblock %}

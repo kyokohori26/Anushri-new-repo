@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Disaster - Queue-Kyun.com</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', 'Marker Felt', 'Arial Rounded', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .error-container {
+            background: white;
+            width: 90%;
+            max-width: 800px;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            position: relative;
+            transform: rotate(-1deg);
+            animation: wobble 8s infinite;
+        }
+        
+        @keyframes wobble {
+            0%, 100% { transform: rotate(-1deg); }
+            50% { transform: rotate(1deg); }
+        }
+        
+        .header {
+            background: #ff6b6b;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header h1 {
+            color: white;
+            font-size: 3rem;
+            text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.2);
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .header::before {
+            content: "❌❌❌";
+            position: absolute;
+            top: 10px;
+            left: 0;
+            right: 0;
+            font-size: 5rem;
+            opacity: 0.2;
+            z-index: 1;
+        }
+        
+        .content {
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 1.8rem;
+            color: #e63946;
+            margin-bottom: 30px;
+            background: #ffeef0;
+            padding: 20px;
+            border-radius: 15px;
+            border: 3px dashed #e63946;
+            position: relative;
+        }
+        
+        .error-message::after {
+            content: "⚠️";
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            font-size: 2.5rem;
+            background: white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid #e63946;
+        }
+        
+        .bunty-section {
+            margin: 40px 0;
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 20px;
+            border: 5px solid #4ecdc4;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .bunty-section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 10px;
+            background: repeating-linear-gradient(45deg, #4ecdc4, #4ecdc4 10px, #1a936f 10px, #1a936f 20px);
+        }
+        
+        .bunty-title {
+            font-size: 1.8rem;
+            color: #2b2d42;
+            margin-bottom: 20px;
+        }
+        
+        .bunty-gif {
+            max-height: 200px;
+            border-radius: 15px;
+            border: 3px solid #ff6b6b;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s;
+        }
+        
+        .bunty-gif:hover {
+            transform: scale(1.05) rotate(3deg);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
+        }
+        
+        .bunty-message {
+            font-size: 1.5rem;
+            margin-top: 20px;
+            color: #2b2d42;
+            font-style: italic;
+        }
+        
+        .attempt-counter {
+            background: #2b2d42;
+            color: white;
+            display: inline-block;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-container {
+            margin: 30px 0;
+        }
+        
+        .try-again-btn {
+            background: linear-gradient(135deg, #4ecdc4, #1a936f);
+            color: white;
+            border: none;
+            padding: 18px 45px;
+            font-size: 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .try-again-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .try-again-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+        
+        .try-again-btn::after {
+            content: "→";
+            margin-left: 15px;
+            font-size: 1.8rem;
+        }
+        
+        .tips-section {
+            background: #f0f8ff;
+            padding: 25px;
+            border-radius: 20px;
+            margin-top: 30px;
+            border: 3px dashed #4ecdc4;
+        }
+        
+        .tips-title {
+            color: #2b2d42;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .tips-title::before {
+            content: "💡";
+            margin-right: 15px;
+            font-size: 2rem;
+        }
+        
+        .tips-list {
+            text-align: left;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .tips-list li {
+            margin: 15px 0;
+            font-size: 1.2rem;
+            color: #2b2d42;
+            padding-left: 35px;
+            position: relative;
+        }
+        
+        .tips-list li::before {
+            content: "•";
+            color: #ff6b6b;
+            font-size: 2rem;
+            position: absolute;
+            left: 0;
+            top: -5px;
+        }
+        
+        .footer {
+            background: #2b2d42;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2.2rem; }
+            .error-message { font-size: 1.4rem; }
+            .bunty-title { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container floating">
+        <div class="header">
+            <h1>OTP DISASTER!</h1>
+        </div>
+        
+        <div class="content">
+            <div class="error-message">
+                {{ error_message }}
+            </div>
+            
+            <div class="attempt-counter">
+                Failed Attempts: {{ session.otp_attempts }}
+            </div>
+            
+            <div class="bunty-section">
+                <h2 class="bunty-title">Bunty's Emotional Response</h2>
+                <img src="{{ bunty_gif }}" alt="Bunty crying" class="bunty-gif">
+                <p class="bunty-message">"Even Bunty can't believe you messed this up!"</p>
+            </div>
+            
+            <div class="btn-container">
+                <button class="try-again-btn" onclick="window.location.href='{{ url_for('payment') }}'">
+                    TRY AGAIN
+                </button>
+            </div>
+            
+            <div class="tips-section">
+                <h3 class="tips-title">Helpful OTP Tips (Maybe?)</h3>
+                <ul class="tips-list">
+                    <li>Check if your carrier pigeon arrived with the OTP</li>
+                    <li>Ask the whispering stranger to speak louder</li>
+                    <li>Make sure you're entering the OTP in this lifetime</li>
+                    <li>Try bribing the server with chai and samosas</li>
+                    <li>Sacrifice a popcorn kernel to the sanskaar gods</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer">
+            Queue-Kyun.com - Agar himmat hai toh book karo!
+        </div>
+    </div>
+    
+    <script>
+        // Add floating animation to Bunty's GIF
+        const buntyGif = document.querySelector('.bunty-gif');
+        setInterval(() => {
+            buntyGif.classList.toggle('floating');
+        }, 3000);
+        
+        // Add wobble effect to the error message
+        const errorMessage = document.querySelector('.error-message');
+        setInterval(() => {
+            errorMessage.style.transform = 'rotate(' + (Math.random() * 4 - 2) + 'deg)';
+            setTimeout(() => {
+                errorMessage.style.transform = 'rotate(0deg)';
+            }, 500);
+        }, 3000);
+    </script>
+</body>
+</html>
